@@ -27,7 +27,7 @@ import os.path
 from PIL import Image
 import sys
 
-ALL_IPHONE = [
+ICON_SIZES = [
     (57, False), # App iPhone Non-Retina (iOS 6.1 and Prior)
     (114, True), # App iPhone Retina (iOS 6.1 and Prior)
     (120, True), # App iPhone Retina
@@ -38,6 +38,12 @@ ALL_IPHONE = [
 
     (29, False), # Settings iPhone Non-Retina (iOS 6.1 and Prior)
     (58, True),  # Settings iPhone Retina
+
+    (40, False), # iPad Spotlight Non-Retina
+    (80, True),  # iPad Spotlight Retina
+
+    (76, False), # iPad App Non-Retina
+    (152, True), # iPad App Retina
 ]
 
 if len(sys.argv) != 3:
@@ -52,7 +58,7 @@ if not os.path.isdir(dst_path):
     os.makedirs(dst_path)
 
 im = Image.open(src_file_path)
-for (size, is_retina) in ALL_IPHONE:
+for (size, is_retina) in ICON_SIZES:
     im_resized = im.resize((size, size), Image.ANTIALIAS)
     display_size = size / 2 if is_retina else size
     scale_name = "@2x" if is_retina else ""
