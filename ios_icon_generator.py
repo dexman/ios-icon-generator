@@ -27,24 +27,33 @@ import os.path
 from PIL import Image
 import sys
 
-ICON_SIZES = [
-    (57, False), # App iPhone Non-Retina (iOS 6.1 and Prior)
-    (114, True), # App iPhone Retina (iOS 6.1 and Prior)
-    (120, True), # App iPhone Retina
+ICONS = {
+    'iphone': {
+        'Settings': (29, [1, 2, 3]),
+        'Spotlight': (40, [2, 3]),
+        'App-5-6': (57, [1, 2]),
+        'App-7-8': (60, [2, 3]),
+    },
+    'ipad': {
+        'Settings': (29, [1, 2]),
+        'Spotlight-5-6': (60, [1, 2]),
+        'Spotlight-7-8': (40, [1, 2]),
+        'App-5-6': (72, [1, 2]),
+        'App-7-8': (76, [1, 2]),
+    },
+}
 
-    (29, False), # Spotlight iPhone Non-Retina (iOS 6.1 and Prior)
-    (58, True),  # Spotlight iPhone Retina (iOS 6.1 and Prior)
-    (80, True),  # Spotlight iPhone Retina
+def image_name(image_type, device_name, scale):
+    scale_string = '' if scale == 1 else "-@%dx" % (scale)
+    return 'Icon-%s%s~%s.png' % (image_type, scale_string, device_name)
 
-    (29, False), # Settings iPhone Non-Retina (iOS 6.1 and Prior)
-    (58, True),  # Settings iPhone Retina
-
-    (40, False), # iPad Spotlight Non-Retina
-    (80, True),  # iPad Spotlight Retina
-
-    (76, False), # iPad App Non-Retina
-    (152, True), # iPad App Retina
-]
+def iter_icons():
+    for device_name, device_icons in ICONS.items():
+        for image_type, image_specs in device_icons.items():
+            size = image_specs[0]
+            scales = image_specs[1]
+            for scale in scales:
+                yield image_type, device_name, size, scale
 
 if len(sys.argv) != 3:
     print("Usage: %s <input image> <destination directory>" %
@@ -58,10 +67,10 @@ if not os.path.isdir(dst_path):
     os.makedirs(dst_path)
 
 im = Image.open(src_file_path)
-for (size, is_retina) in ICON_SIZES:
-    im_resized = im.resize((size, size), Image.ANTIALIAS)
-    display_size = size / 2 if is_retina else size
-    scale_name = "@2x" if is_retina else ""
-    dst_name = "Icon-%d%s~iphone.png" % (display_size, scale_name)
+for image_type, device_name, size, scale in iter_icons():
+    new_size = size * scale
+    im_resized = im.resize((new_size, new_size), Image.ANTIALIAS)
+
+    dst_name = image_name(image_type, device_name, scale)
     dst_file_path = os.path.join(dst_path, dst_name)
     im_resized.save(dst_file_path)
